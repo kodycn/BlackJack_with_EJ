@@ -15,7 +15,13 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void on_BetButton_clicked();
+
 private:
     Ui::MainWindow *ui;
+    // bet-related fields
+    int currentMoney = 100;
+    int betAmount = 0;
 };
 #endif // MAINWINDOW_H
