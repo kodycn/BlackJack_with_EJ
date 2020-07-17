@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "Logic.h"
+
 
 #include <QIntValidator>
 #include <iostream> // std::cerr
@@ -14,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     // set BetInputter QLineEdit object to only accept numeric inputs
     ui->BetInputter->setValidator(new QIntValidator(0, 999999999, this) );
     // initial labeling of money
-    ui->TotalMoneyLabel->setText( QString::number(currentMoney) );
+    ui->TotalMoneyLabel->setText( QString::number(Logic::getCurrentMoney()) );
 }
 MainWindow::~MainWindow()
 {
@@ -23,13 +25,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_BetButton_clicked()
 {
-    // Convert bet from ui->BetInputter to int from QString
-    int receivedBet = ui->BetInputter->text().toInt();
-    // Good bet received, reduce from currentMoney
-    if (receivedBet <= currentMoney)
+    // put input bet through Logic
+    if ( Logic::doBet(ui->BetInputter->text()) )
     {
-        currentMoney -= receivedBet;
-        ui->TotalMoneyLabel->setText( QString::number(currentMoney) );
+        ui->TotalMoneyLabel->setText( QString::number(Logic::getCurrentMoney()) );
         ui->BetInputter->setText("");
     }
 }

@@ -20,8 +20,5 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    // bet-related fields
-    int currentMoney = 100;
-    int betAmount = 0;
 };
 #endif // MAINWINDOW_H
