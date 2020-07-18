@@ -26,14 +26,23 @@ private:
     /// Functions
     // helper functions
     static std::vector<Card> generateDeck();
+
+
 public:
     /// Functions
     static bool doBet(int);
     static bool doBet(const QString&);
+    static void shuffleDeck();
+
+    // Game funcs
+    static void dealCards();
 
     // getter funcs
     static int getCurrentBet();
     static int getCurrentMoney();
+    static const std::vector<Card> getDeck();
+    static const std::vector<Card> getDealerHand();
+    static const std::vector<Card> getUserHand();
 };
 
 #endif // LOGIC_H
