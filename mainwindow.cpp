@@ -49,6 +49,11 @@ void MainWindow::on_BetButton_clicked()
         ui->DealerHandLayout->addWidget( new QLabel("??") );
         buffer.clear();
         buffer.str(std::string());
+
+        /// DEBUG!
+        ui->UserHandLayout->addWidget(new Hand());
+        /// NO DEBUG!
+#if 0
         // display user hand (both cards)
         buffer << Logic::getUserHand().front();
         QHBoxLayout *userFirstHand = new QHBoxLayout();
@@ -64,6 +69,7 @@ void MainWindow::on_BetButton_clicked()
         );
         buffer.clear();
         buffer.str(std::string());
+#endif
         // show ui
         ui->PlayWidget->setHidden(false);
     }
