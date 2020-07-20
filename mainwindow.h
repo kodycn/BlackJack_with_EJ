@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QFrame>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -20,5 +21,10 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+
+    // user hands vector (as QHBoxLayouts) (handles split games)
+    std::vector<QFrame> userHands {};
+    // helper functions
+    void showCards();
 };
 #endif // MAINWINDOW_H

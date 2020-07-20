@@ -39,22 +39,33 @@ void MainWindow::on_BetButton_clicked()
         /// deal cards to user and dealer
         Logic::dealCards();
         /// update ui to have user cards and dealer cards
+        // buffer for card output stream
         std::stringstream buffer;
-        // show one dealer card
-        buffer << Logic::getDealerHand().back();
-        ui->DealerCardFirst->setText( QString::fromStdString(buffer.str()) );
+        // display dealer hand (only one card)
+        buffer << Logic::getDealerHand().front();
+        ui->DealerHandLayout->addWidget(
+                    new QLabel(QString::fromStdString(buffer.str()))
+        );
+        ui->DealerHandLayout->addWidget( new QLabel("??") );
         buffer.clear();
         buffer.str(std::string());
-        // show both cards for user
-        buffer << Logic::getUserHand().back();
-        ui->UserCardFirst->setText( QString::fromStdString(buffer.str()) );
-        buffer.clear();
-        buffer.str(std::string());
+        // display user hand (both cards)
         buffer << Logic::getUserHand().front();
-        ui->UserCardSecond->setText( QString::fromStdString(buffer.str()) );
+        QHBoxLayout *userFirstHand = new QHBoxLayout();
+        ui->UserHandLayout->addLayout(userFirstHand);
+        userFirstHand->addWidget(
+                    new QLabel(QString::fromStdString(buffer.str()))
+        );
+        buffer.clear();
+        buffer.str(std::string());
+        buffer << Logic::getUserHand().back();
+        userFirstHand->addWidget(
+                    new QLabel(QString::fromStdString(buffer.str()))
+        );
         buffer.clear();
         buffer.str(std::string());
         // show ui
         ui->PlayWidget->setHidden(false);
     }
 }
+
