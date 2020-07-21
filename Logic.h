@@ -6,9 +6,12 @@
 
 #include "mainwindow.h"
 #include "Card.h"
+#include "Hand.h"
 
 class Logic
 {
+    // friends
+    friend class MainWindow;
 private:
     /// Fields
     static int currentBet;
@@ -16,7 +19,7 @@ private:
 
     // card fields
     static std::vector<Card> deck;
-    static std::vector<Card> userHand;
+    static std::vector<std::vector<Card>> userHands; // split functi0nality
     static std::vector<Card> dealerHand;
 
     // random number generator fields
@@ -26,6 +29,7 @@ private:
     /// Functions
     // helper functions
     static std::vector<Card> generateDeck();
+
 
 
 public:
@@ -42,7 +46,7 @@ public:
     static int getCurrentMoney();
     static const std::vector<Card> getDeck();
     static const std::vector<Card> getDealerHand();
-    static const std::vector<Card> getUserHand();
+    static const std::vector<std::vector<Card>> getUserHand();
 };
 
 #endif // LOGIC_H

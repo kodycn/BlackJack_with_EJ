@@ -26,6 +26,60 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::showCards()
+{
+
+    // emptying the layout beforehand
+
+    // Note: Card isn't a widget (1)
+    while ( ui->DealerHandLayout->count() > 0) {
+        QLayoutItem* dealerChild = ui->DealerHandLayout->takeAt ( 0 );
+        // not sure if line below needed
+        if ( dealerChild->widget() != 0 ) {
+            delete dealerChild->widget(); // (1)
+        }
+        delete dealerChild;
+    }
+
+    while ( ui->UserHandLayout->count() > 0) {
+        QLayoutItem* userChild = ui->UserHandLayout->takeAt ( 0 );
+        if ( userChild->widget() != 0 ) {
+            delete userChild->widget();
+        }
+        delete userChild;
+    }
+
+
+
+    // buffer for card output stream
+    std::stringstream buffer;
+    // display dealer hand (only one card)
+
+    buffer << Logic::dealerHand.front();
+    ui->DealerHandLayout->addWidget(
+                new QLabel(QString::fromStdString(buffer.str()))
+    );
+    ui->DealerHandLayout->addWidget( new QLabel("??") );
+    buffer.clear();
+    buffer.str(std::string());
+
+    // display all user hands
+    for(auto& userHand: Logic::userHands)
+    {
+        Hand* newUserHand = new Hand;
+        ui->UserHandLayout->addWidget(newUserHand);
+        for(Card& card: userHand)
+        {
+            buffer << card;
+            newUserHand->getLayout()->addWidget(
+                        new QLabel(QString::fromStdString(buffer.str()))
+            );
+            buffer.clear();
+            buffer.str(std::string());
+        }
+    }
+}
+
 void MainWindow::on_BetButton_clicked()
 {
     // put input bet through Logic
@@ -39,37 +93,7 @@ void MainWindow::on_BetButton_clicked()
         /// deal cards to user and dealer
         Logic::dealCards();
         /// update ui to have user cards and dealer cards
-        // buffer for card output stream
-        std::stringstream buffer;
-        // display dealer hand (only one card)
-        buffer << Logic::getDealerHand().front();
-        ui->DealerHandLayout->addWidget(
-                    new QLabel(QString::fromStdString(buffer.str()))
-        );
-        ui->DealerHandLayout->addWidget( new QLabel("??") );
-        buffer.clear();
-        buffer.str(std::string());
-
-        /// DEBUG!
-        ui->UserHandLayout->addWidget(new Hand());
-        /// NO DEBUG!
-#if 0
-        // display user hand (both cards)
-        buffer << Logic::getUserHand().front();
-        QHBoxLayout *userFirstHand = new QHBoxLayout();
-        ui->UserHandLayout->addLayout(userFirstHand);
-        userFirstHand->addWidget(
-                    new QLabel(QString::fromStdString(buffer.str()))
-        );
-        buffer.clear();
-        buffer.str(std::string());
-        buffer << Logic::getUserHand().back();
-        userFirstHand->addWidget(
-                    new QLabel(QString::fromStdString(buffer.str()))
-        );
-        buffer.clear();
-        buffer.str(std::string());
-#endif
+        showCards();
         // show ui
         ui->PlayWidget->setHidden(false);
     }

@@ -8,7 +8,7 @@ int Logic::currentBet   = 0;
 int Logic::currentMoney = 100;
 // card fields
 std::vector<Card> Logic::deck = Logic::generateDeck();
-std::vector<Card> Logic::userHand {};
+std::vector<std::vector<Card>> Logic::userHands {};
 std::vector<Card> Logic::dealerHand {};
 // random number generator fields
 std::random_device Logic::rd {};
@@ -62,30 +62,43 @@ void Logic::shuffleDeck()
 /// Public Game function definitions
 void Logic::dealCards()
 {
+    auto& dealerHandCards = dealerHand;
+
     // if cards are in dealer's hand, return to deck
-    while (dealerHand.size() > 0)
+    while (dealerHandCards.size() > 0)
     {
-        deck.push_back( Card(dealerHand.back()) );
-        dealerHand.pop_back();
+        deck.push_back( Card(dealerHandCards.back()) );
+        dealerHandCards.pop_back();
     }
     // if cards are in user's hand, return to deck
-    while (userHand.size() > 0)
+
+    while (userHands.size() >0) // all the possible hands in user's hand
     {
-        deck.push_back( Card(userHand.back()) );
-        userHand.pop_back();
+        auto& hand = userHands.back(); // one hand at a time
+        while(hand.size() > 0) // while there're still cards in that split
+        {
+            deck.push_back(Card(hand.back())); // put the card back
+            hand.pop_back(); // take the card outta the hand
+        }
+        userHands.pop_back(); //take that hand out after we're done with it
     }
 
     // shuffle deck prior to dealing
     shuffleDeck();
-
+    std::vector<Card> newUserHand {};
     // deal cards to user and dealer
     for (int i = 0; i < 2; i++)
     {
         dealerHand.push_back( Card(deck.back()) );
         deck.pop_back();
-        userHand.push_back( Card(deck.back()) );
+
+        newUserHand.push_back( Card(deck.back()) );
         deck.pop_back();
+
+
     }
+    userHands.push_back(newUserHand); // adding the hand once full w/ cardz
+
 }
 
 
@@ -107,7 +120,7 @@ const std::vector<Card> Logic::getDealerHand()
 {
     return dealerHand;
 }
-const std::vector<Card> Logic::getUserHand()
+const std::vector<std::vector<Card>> Logic::getUserHand()
 {
-    return userHand;
+    return userHands;
 }
