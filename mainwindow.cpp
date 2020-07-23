@@ -26,6 +26,31 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+
+/// "PRIVATE SLOTS:" FUNCTIONS
+void MainWindow::on_BetButton_clicked()
+{
+    // put input bet through Logic
+    if ( Logic::doBet(ui->BetInputter->text()) )
+    {
+        ui->TotalMoneyLabel->setText( QString::number(Logic::getCurrentMoney()) );
+        ui->BetInputter->setText("");
+        // disable bet button
+        // DEBUG! ui->BetButton->setEnabled(false);
+
+        /// deal cards to user and dealer
+        Logic::dealCards();
+        // DEBUG!
+        std::cout << Logic::dealerHand.front() << ", " << Logic::dealerHand.back() << std::endl;
+        /// update ui to have user cards and dealer cards
+        showCards();
+        ui->PlayWidget->setHidden(false);
+        /// start enabling the buttons that apply to the player
+        updateChoices();
+    }
+}
+
+/// HELPER FUNCTIONS
 void MainWindow::showCards()
 {
 
@@ -53,8 +78,8 @@ void MainWindow::showCards()
 
     // buffer for card output stream
     std::stringstream buffer;
-    // display dealer hand (only one card)
 
+    // display dealer hand (only one card)
     buffer << Logic::dealerHand.front();
     ui->DealerHandLayout->addWidget(
                 new QLabel(QString::fromStdString(buffer.str()))
@@ -66,7 +91,7 @@ void MainWindow::showCards()
     // display all user hands
     for(auto& userHand: Logic::userHands)
     {
-        Hand* newUserHand = new Hand;
+        HandUI* newUserHand = new HandUI();
         ui->UserHandLayout->addWidget(newUserHand);
         for(Card& card: userHand)
         {
@@ -80,22 +105,39 @@ void MainWindow::showCards()
     }
 }
 
-void MainWindow::on_BetButton_clicked()
+void MainWindow::updateChoices()
 {
-    // put input bet through Logic
-    if ( Logic::doBet(ui->BetInputter->text()) )
-    {
-        ui->TotalMoneyLabel->setText( QString::number(Logic::getCurrentMoney()) );
-        ui->BetInputter->setText("");
-        // disable bet button
-        ui->BetButton->setEnabled(false);
+    // first reset insurance/surrender/split buttons
+    ui->InsuranceButton->setDisabled(true);
+    ui->SurrenderButton->setDisabled(true);
+    ui->SplitButton->setDisabled(true);
 
-        /// deal cards to user and dealer
-        Logic::dealCards();
-        /// update ui to have user cards and dealer cards
-        showCards();
-        // show ui
-        ui->PlayWidget->setHidden(false);
+    // boolean for dealer's shown cards
+    bool hasAceShown = (Logic::dealerHand.front().getRank() == 1);
+    bool hasTenOrFaceShown = (Logic::dealerHand.front().getRank() >= 10);
+
+    // hit and stand and double down are always available
+    ui->HitButton->setEnabled(true);
+    ui->StandButton->setEnabled(true);
+    ui->DoubleDownButton->setEnabled(true);
+
+    // insurance is available when dealer has shown an ace
+    if (hasAceShown)
+    {
+        ui->InsuranceButton->setEnabled(true);
+    }
+
+    // surrender is available when dealer has shown ace or 10 is shown AND dealer doesn't have blackjack
+    if ( (hasAceShown       && Logic::dealerHand.back().getRank() < 10) ||
+         (hasTenOrFaceShown && Logic::dealerHand.back().getRank() != 1)
+       )
+    {
+        ui->SurrenderButton->setEnabled(true);
+    }
+
+    // split is available when player has two cards of the same rank
+    if ( Logic::userHands.front().front().getRank() == Logic::userHands.front().back().getRank() )
+    {
+        ui->SplitButton->setEnabled(true);
     }
 }
-

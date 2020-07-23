@@ -6,7 +6,7 @@
 
 #include "mainwindow.h"
 #include "Card.h"
-#include "Hand.h"
+#include "HandUI.h"
 
 class Logic
 {

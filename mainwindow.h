@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QHBoxLayout>
 
-#include "Hand.h"
+#include "HandUI.h"
 #include "Logic.h"
 
 QT_BEGIN_NAMESPACE
@@ -24,13 +24,9 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    /* DEBUG
-    Hand& dealerHand = dealerHand; // no splits bby
-
-    // user hands vector (as Hand objects) (handles split games)
-    std::vector<Hand>& userHands = Logic::userHands;*/
 
     // helper functions
-    void showCards();
+    void showCards();       // displays cards in Logic class
+    void updateChoices();   // processes cards in Logic class and enables buttons
 };
 #endif // MAINWINDOW_H

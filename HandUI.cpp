@@ -1,18 +1,13 @@
-#include "Hand.h"
+#include "HandUI.h"
 #include <iostream>
 
-Hand::Hand()
+HandUI::HandUI()
 {
     this->setFrameStyle(QFrame::Box | QFrame::Plain);
     this->handLayout = new QHBoxLayout(this);
 }
 
-std::vector<Card>& Hand::getCards()
-{
-    return cards; // dangerous
-}
-
-QHBoxLayout* Hand::getLayout() const
+QHBoxLayout* HandUI::getLayout() const
 {
     return handLayout;
 }
