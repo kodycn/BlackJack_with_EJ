@@ -9,6 +9,7 @@ int Logic::currentMoney = 100;
 // card fields
 std::vector<Card> Logic::deck = Logic::generateDeck();
 std::vector<std::vector<Card>> Logic::userHands {};
+size_t Logic::activeUserHandIndex = 0;
 std::vector<Card> Logic::dealerHand {};
 // random number generator fields
 std::random_device Logic::rd {};

@@ -3,7 +3,6 @@
 
 HandUI::HandUI()
 {
-    this->setFrameStyle(QFrame::Box | QFrame::Plain);
     this->handLayout = new QHBoxLayout(this);
 }
 

@@ -89,11 +89,18 @@ void MainWindow::showCards()
     buffer.str(std::string());
 
     // display all user hands
-    for(auto& userHand: Logic::userHands)
+    for(size_t idx = 0; idx < Logic::userHands.size(); idx++)
     {
         HandUI* newUserHand = new HandUI();
+
+        // put a box around active hand
+        if (idx == Logic::activeUserHandIndex) newUserHand->setFrameStyle(QFrame::Box | QFrame::Plain);
+
+        // add the newuserhand to the layout
         ui->UserHandLayout->addWidget(newUserHand);
-        for(Card& card: userHand)
+
+        // add QLabels for the cards
+        for( Card& card : Logic::userHands.at(idx) )
         {
             buffer << card;
             newUserHand->getLayout()->addWidget(
@@ -105,7 +112,7 @@ void MainWindow::showCards()
     }
 }
 
-void MainWindow::updateChoices()
+void MainWindow::updateChoices() // this should only be called at the start of the game
 {
     // first reset insurance/surrender/split buttons
     ui->InsuranceButton->setDisabled(true);

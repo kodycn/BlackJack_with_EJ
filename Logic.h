@@ -20,6 +20,7 @@ private:
     // card fields
     static std::vector<Card> deck;
     static std::vector<std::vector<Card>> userHands; // split functi0nality
+    static size_t activeUserHandIndex;
     static std::vector<Card> dealerHand;
 
     // random number generator fields
