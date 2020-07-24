@@ -38,6 +38,7 @@ public:
     static bool doBet(int);
     static bool doBet(const QString&);
     static void shuffleDeck();
+    static bool hasAce(const std::vector<Card>&);
 
     // Game funcs
     static void dealCards();

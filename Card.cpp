@@ -10,6 +10,22 @@ QString Card::getSuit() const
     return suit;
 }
 
+unsigned short Card::operator+ (const Card& that)
+{
+    unsigned short thisRank = this->getRank();
+    unsigned short thatRank = that.getRank();
+    if (thisRank > 10) thisRank = 10;
+    if (thatRank > 10) thatRank = 10;
+    return thisRank + thatRank;
+}
+
+unsigned short Card::operator+ (const unsigned short& that)
+{
+    unsigned short thisRank = this->getRank();
+    if (thisRank > 10) thisRank = 10;
+    return thisRank + that;
+}
+
 // non-member card output
 std::ostream& operator<<(std::ostream& out, Card c)
 {

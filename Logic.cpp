@@ -59,6 +59,14 @@ void Logic::shuffleDeck()
     std::shuffle(deck.begin(), deck.end(), rng);
 }
 
+bool Logic::hasAce(const std::vector<Card>& hand)
+{
+    for (const Card& card : hand)
+    {
+        if (card.getRank() == 1) return true;
+    }
+    return false;
+}
 
 /// Public Game function definitions
 void Logic::dealCards()

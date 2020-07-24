@@ -22,6 +22,10 @@ public:
 private slots:
     void on_BetButton_clicked();
 
+    void on_HitButton_clicked();
+
+    void on_StandButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 

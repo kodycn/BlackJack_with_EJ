@@ -15,11 +15,15 @@ class HandUI : public QFrame
     Q_OBJECT
 private:
     QHBoxLayout *handLayout;
+    QLabel *valueLabel;
 public:
     HandUI();
 
     // getter funcs
     QHBoxLayout* getLayout() const;
+
+    // setter funcs
+    void setValueLabel(const QString&);
 };
 
 #endif // HANDUI_H

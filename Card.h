@@ -22,6 +22,10 @@ public:
     // getter funcs
     unsigned short getRank() const;
     QString getSuit() const;
+
+    // operator overloading (to add card ranks together)
+    unsigned short operator+ (const Card&);
+    unsigned short operator+ (const unsigned short&);
 };
 
 #endif // CARD_H

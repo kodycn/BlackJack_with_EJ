@@ -40,13 +40,46 @@ void MainWindow::on_BetButton_clicked()
 
         /// deal cards to user and dealer
         Logic::dealCards();
-        // DEBUG!
-        std::cout << Logic::dealerHand.front() << ", " << Logic::dealerHand.back() << std::endl;
         /// update ui to have user cards and dealer cards
         showCards();
         ui->PlayWidget->setHidden(false);
         /// start enabling the buttons that apply to the player
         updateChoices();
+    }
+}
+
+void MainWindow::on_HitButton_clicked()
+{
+    // add card to active hand and then show cards
+    auto& activeHand = Logic::userHands.at(Logic::activeUserHandIndex);
+    activeHand.push_back( Logic::deck.back() );
+    Logic::deck.pop_back();
+    unsigned short newHandValue = 0;
+    for (auto& card : activeHand)
+    {
+        newHandValue = card + newHandValue;
+    }
+    if (newHandValue >= 21)
+    {
+        on_StandButton_clicked(); // disables buttons
+    }
+    showCards();
+}
+
+void MainWindow::on_StandButton_clicked()
+{
+    // move to next hand (for splits)
+    Logic::activeUserHandIndex++;
+
+    // disable all buttons if Logic::activeUserHandIndex is now invalid
+    if (Logic::activeUserHandIndex >= Logic::userHands.size())
+    {
+        ui->HitButton->setDisabled(true);
+        ui->StandButton->setDisabled(true);
+        ui->InsuranceButton->setDisabled(true);
+        ui->SurrenderButton->setDisabled(true);
+        ui->SplitButton->setDisabled(true);
+        ui->DoubleDownButton->setDisabled(true);
     }
 }
 
@@ -92,6 +125,7 @@ void MainWindow::showCards()
     for(size_t idx = 0; idx < Logic::userHands.size(); idx++)
     {
         HandUI* newUserHand = new HandUI();
+        unsigned short handValue = 0;
 
         // put a box around active hand
         if (idx == Logic::activeUserHandIndex) newUserHand->setFrameStyle(QFrame::Box | QFrame::Plain);
@@ -99,7 +133,7 @@ void MainWindow::showCards()
         // add the newuserhand to the layout
         ui->UserHandLayout->addWidget(newUserHand);
 
-        // add QLabels for the cards
+        // add QLabels for the cards (also calculate value of card)
         for( Card& card : Logic::userHands.at(idx) )
         {
             buffer << card;
@@ -108,6 +142,30 @@ void MainWindow::showCards()
             );
             buffer.clear();
             buffer.str(std::string());
+            handValue = card + handValue;
+        }
+
+        // update label for the value of the user's hand
+        std::string hvStr = std::to_string(handValue);
+        if ( Logic::hasAce(Logic::userHands.at(idx)) )
+        {
+            if (handValue + 10 < 21)
+            {
+                std::string hvStrPlusTen = std::to_string(handValue + 10);
+                newUserHand->setValueLabel( QString::fromStdString(hvStr + "/" + hvStrPlusTen) );
+            }
+            else if ( handValue + 10 == 21 )
+            {
+                newUserHand->setValueLabel("21");
+            }
+            else
+            {
+                newUserHand->setValueLabel(QString::fromStdString(hvStr));
+            }
+        }
+        else
+        {
+            newUserHand->setValueLabel(QString::fromStdString(hvStr));
         }
     }
 }
