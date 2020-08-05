@@ -2,8 +2,8 @@
 #include "ui_mainwindow.h"
 #include "Logic.h"
 
-
 #include <QIntValidator>
+
 #include <iostream> // std::cerr
 #include <sstream>
 
@@ -43,6 +43,10 @@ void MainWindow::on_BetButton_clicked()
         /// update ui to have user cards and dealer cards
         showCards();
         ui->PlayWidget->setHidden(false);
+        /// handle insurance UI elements
+        ui->InsuranceComboBox->setCurrentIndex(0);
+        ui->InsurancePaidLabel->setText("");
+        ui->InsurancePaidLabel->setDisabled(true);
         /// start enabling the buttons that apply to the player
         updateChoices();
     }
@@ -59,11 +63,11 @@ void MainWindow::on_HitButton_clicked()
     {
         newHandValue = card + newHandValue;
     }
+    showCards();
     if (newHandValue >= 21)
     {
-        on_StandButton_clicked(); // disables buttons
+        emit on_StandButton_clicked();
     }
-    showCards();
 }
 
 void MainWindow::on_StandButton_clicked()
@@ -76,29 +80,42 @@ void MainWindow::on_StandButton_clicked()
     {
         ui->HitButton->setDisabled(true);
         ui->StandButton->setDisabled(true);
-        ui->InsuranceButton->setDisabled(true);
         ui->SurrenderButton->setDisabled(true);
         ui->SplitButton->setDisabled(true);
         ui->DoubleDownButton->setDisabled(true);
+
+        // Dealer acts here
+        Logic::doDealerActions();
+        revealDealerHand();
     }
 }
+
+void MainWindow::on_InsuranceComboBox_currentIndexChanged(int index)
+{
+    if (index == 1) // insurance is taken
+    {
+        Logic::doInsurance();
+        ui->TotalMoneyLabel->setText( QString::number(Logic::getCurrentMoney()) );
+        ui->TotalMoneyLabel->setEnabled(true);
+        ui->InsurancePaidLabel->setText( QString("Ins: ") + QString::number(Logic::getInsuranceBet()) );
+    }
+    updateChoices(); // to update the rest of the choices
+}
+
 
 /// HELPER FUNCTIONS
 void MainWindow::showCards()
 {
 
-    // emptying the layout beforehand
-
-    // Note: Card isn't a widget (1)
+    // emptying the dealer and user handlayouts beforehand
     while ( ui->DealerHandLayout->count() > 0) {
         QLayoutItem* dealerChild = ui->DealerHandLayout->takeAt ( 0 );
         // not sure if line below needed
         if ( dealerChild->widget() != 0 ) {
-            delete dealerChild->widget(); // (1)
+            delete dealerChild->widget();
         }
         delete dealerChild;
     }
-
     while ( ui->UserHandLayout->count() > 0) {
         QLayoutItem* userChild = ui->UserHandLayout->takeAt ( 0 );
         if ( userChild->widget() != 0 ) {
@@ -170,10 +187,47 @@ void MainWindow::showCards()
     }
 }
 
+void MainWindow::revealDealerHand()
+{
+    // empty dealer hand layout beforehand
+    while ( ui->DealerHandLayout->count() > 0) {
+        QLayoutItem* dealerChild = ui->DealerHandLayout->takeAt ( 0 );
+        // not sure if line below needed
+        if ( dealerChild->widget() != 0 ) {
+            delete dealerChild->widget(); // (1)
+        }
+        delete dealerChild;
+    }
+
+    // buffer for card output stream
+    std::stringstream buffer;
+    bool dealerHasAce = Logic::hasAce(Logic::dealerHand);
+    unsigned short handValue = (dealerHasAce)?10:0; // offset by 10 if ace
+
+    // add QLabels for the cards (also calculate value of card)
+    for(size_t idx = 0; idx < Logic::dealerHand.size(); ++idx)
+    {
+        auto& card = Logic::dealerHand.at(idx);
+        buffer << card;
+        ui->DealerHandLayout->addWidget(
+                    new QLabel(QString::fromStdString(buffer.str()))
+        );
+        buffer.clear();
+        buffer.str(std::string());
+        handValue = card + handValue;
+        if (handValue > 21 && dealerHasAce)
+        {
+            handValue -= 10;
+            dealerHasAce = false;
+        }
+        ui->DealerHandValueLabel->setText( QString::number(handValue) );
+    }
+}
+
 void MainWindow::updateChoices() // this should only be called at the start of the game
 {
     // first reset insurance/surrender/split buttons
-    ui->InsuranceButton->setDisabled(true);
+    ui->InsuranceComboBox->setDisabled(true);
     ui->SurrenderButton->setDisabled(true);
     ui->SplitButton->setDisabled(true);
 
@@ -181,21 +235,22 @@ void MainWindow::updateChoices() // this should only be called at the start of t
     bool hasAceShown = (Logic::dealerHand.front().getRank() == 1);
     bool hasTenOrFaceShown = (Logic::dealerHand.front().getRank() >= 10);
 
+    // if ace is shown and user can afford insurance, then prompt user to choose insurance option
+    if (hasAceShown && ui->InsuranceComboBox->currentIndex() == 0
+            && (Logic::currentMoney - (Logic::currentBet / 2)) > 0
+        )
+    {
+        ui->InsuranceComboBox->setEnabled(true);
+        return;
+    }
+
     // hit and stand and double down are always available
     ui->HitButton->setEnabled(true);
     ui->StandButton->setEnabled(true);
     ui->DoubleDownButton->setEnabled(true);
 
-    // insurance is available when dealer has shown an ace
-    if (hasAceShown)
-    {
-        ui->InsuranceButton->setEnabled(true);
-    }
-
     // surrender is available when dealer has shown ace or 10 is shown AND dealer doesn't have blackjack
-    if ( (hasAceShown       && Logic::dealerHand.back().getRank() < 10) ||
-         (hasTenOrFaceShown && Logic::dealerHand.back().getRank() != 1)
-       )
+    if ( (hasAceShown || hasTenOrFaceShown) && !Logic::hasBlackjack(Logic::dealerHand) )
     {
         ui->SurrenderButton->setEnabled(true);
     }

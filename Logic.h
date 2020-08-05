@@ -15,6 +15,7 @@ class Logic
 private:
     /// Fields
     static int currentBet;
+    static int currentInsuranceBet;
     static int currentMoney;
 
     // card fields
@@ -37,14 +38,18 @@ public:
     /// Functions
     static bool doBet(int);
     static bool doBet(const QString&);
+    static bool doInsurance();
     static void shuffleDeck();
     static bool hasAce(const std::vector<Card>&);
+    static bool hasBlackjack(const std::vector<Card>&);
 
     // Game funcs
     static void dealCards();
+    static unsigned short doDealerActions();
 
     // getter funcs
     static int getCurrentBet();
+    static int getInsuranceBet();
     static int getCurrentMoney();
     static const std::vector<Card> getDeck();
     static const std::vector<Card> getDealerHand();

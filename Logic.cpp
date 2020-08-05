@@ -3,8 +3,10 @@
 #include <iostream> // std::cerr
 #include <vector>
 
+
 /// Static Field Initialization
-int Logic::currentBet   = 0;
+int Logic::currentBet = 0;
+int Logic::currentInsuranceBet = 0;
 int Logic::currentMoney = 100;
 // card fields
 std::vector<Card> Logic::deck = Logic::generateDeck();
@@ -54,6 +56,17 @@ bool Logic::doBet(const QString& bet)
     return doBet(bet.toInt());
 }
 
+bool Logic::doInsurance()
+{
+    if (currentMoney - (currentBet / 2) > 0)
+    {
+        currentInsuranceBet = currentBet / 2;
+        currentMoney -= currentInsuranceBet;
+        return true;
+    }
+    return false;
+}
+
 void Logic::shuffleDeck()
 {
     std::shuffle(deck.begin(), deck.end(), rng);
@@ -65,6 +78,23 @@ bool Logic::hasAce(const std::vector<Card>& hand)
     {
         if (card.getRank() == 1) return true;
     }
+    return false;
+}
+
+bool Logic::hasBlackjack(const std::vector<Card>& hand)
+{
+    if (hand.size() != 2)
+    {
+        return false;
+    }
+
+    if ( (hand.at(0).getRank() >= 10 && hand.at(1).getRank() == 1) ||
+         (hand.at(1).getRank() >= 10 && hand.at(0).getRank() == 1)
+       )
+    {
+        return true;
+    }
+
     return false;
 }
 
@@ -110,11 +140,41 @@ void Logic::dealCards()
 
 }
 
+unsigned short Logic::doDealerActions()
+{
+    bool dealerHasAce = hasAce(dealerHand);
+    unsigned short currentDealerValue = dealerHand.front() + dealerHand.back();
+    if (dealerHasAce)
+    {
+        currentDealerValue += 10;
+    }
+
+    while (currentDealerValue < 17) // dealer hits until 17 or more
+    {
+        dealerHand.push_back(deck.back());
+        deck.pop_back();
+        currentDealerValue = dealerHand.back() + currentDealerValue;
+        if (currentDealerValue > 21 && dealerHasAce)
+        {
+            currentDealerValue -= 10;
+            dealerHasAce = false;
+        }
+    }
+
+    return currentDealerValue;
+}
+
 
 /// Public Getter function definitions
 int Logic::getCurrentBet()
 {
     return currentBet;
+}
+
+/// Public Getter function definitions
+int Logic::getInsuranceBet()
+{
+    return currentInsuranceBet;
 }
 
 int Logic::getCurrentMoney()
