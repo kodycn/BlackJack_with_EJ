@@ -14,13 +14,15 @@ class Logic
     friend class MainWindow;
 private:
     /// Fields
-    static int currentBet;
+    static int currentBet; // this should not be adjusted when splitting
     static int currentInsuranceBet;
     static int currentMoney;
 
     // card fields
     static std::vector<Card> deck;
     static std::vector<std::vector<Card>> userHands; // split functi0nality
+    static std::vector<bool> doubleDownTracker; // tracking which hand in userHands have doubled down
+                                                // ensure that its size = userHands.size()
     static size_t activeUserHandIndex;
     static std::vector<Card> dealerHand;
 
@@ -31,6 +33,7 @@ private:
     /// Functions
     // helper functions
     static std::vector<Card> generateDeck();
+    static void payPlayer(int);
 
 
 
@@ -38,7 +41,7 @@ public:
     /// Functions
     static bool doBet(int);
     static bool doBet(const QString&);
-    static bool doInsurance();
+    static bool makeInsuranceBet();
     static void shuffleDeck();
     static bool hasAce(const std::vector<Card>&);
     static bool hasBlackjack(const std::vector<Card>&);
@@ -46,6 +49,7 @@ public:
     // Game funcs
     static void dealCards();
     static unsigned short doDealerActions();
+    static void calculatePayout(); // calculate player winnings (depending on the player's hands)
 
     // getter funcs
     static int getCurrentBet();
@@ -54,6 +58,9 @@ public:
     static const std::vector<Card> getDeck();
     static const std::vector<Card> getDealerHand();
     static const std::vector<std::vector<Card>> getUserHand();
+
+    // helper funcs
+    static unsigned short calculateHandValue(const std::vector<Card>&);
 };
 
 #endif // LOGIC_H

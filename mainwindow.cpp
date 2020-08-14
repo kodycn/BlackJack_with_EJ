@@ -94,7 +94,7 @@ void MainWindow::on_InsuranceComboBox_currentIndexChanged(int index)
 {
     if (index == 1) // insurance is taken
     {
-        Logic::doInsurance();
+        Logic::makeInsuranceBet();
         ui->TotalMoneyLabel->setText( QString::number(Logic::getCurrentMoney()) );
         ui->TotalMoneyLabel->setEnabled(true);
         ui->InsurancePaidLabel->setText( QString("Ins: ") + QString::number(Logic::getInsuranceBet()) );

@@ -11,6 +11,7 @@ int Logic::currentMoney = 100;
 // card fields
 std::vector<Card> Logic::deck = Logic::generateDeck();
 std::vector<std::vector<Card>> Logic::userHands {};
+std::vector<bool> Logic::doubleDownTracker {};
 size_t Logic::activeUserHandIndex = 0;
 std::vector<Card> Logic::dealerHand {};
 // random number generator fields
@@ -38,6 +39,10 @@ std::vector<Card> Logic::generateDeck()
     return deck;
 }
 
+void Logic::payPlayer(int amount)
+{
+    currentMoney += amount;
+}
 
 /// Public Function Definitions
 bool Logic::doBet(int bet)
@@ -56,7 +61,7 @@ bool Logic::doBet(const QString& bet)
     return doBet(bet.toInt());
 }
 
-bool Logic::doInsurance()
+bool Logic::makeInsuranceBet()
 {
     if (currentMoney - (currentBet / 2) > 0)
     {
@@ -136,8 +141,8 @@ void Logic::dealCards()
 
 
     }
-    userHands.push_back(newUserHand); // adding the hand once full w/ cardz
-
+    userHands.push_back(newUserHand);   // adding the hand once full w/ cardz
+    doubleDownTracker.push_back(false); // add "false" value to doubleDownTracker
 }
 
 unsigned short Logic::doDealerActions()
@@ -146,6 +151,7 @@ unsigned short Logic::doDealerActions()
     unsigned short currentDealerValue = dealerHand.front() + dealerHand.back();
     if (dealerHasAce)
     {
+        // add ace offset
         currentDealerValue += 10;
     }
 
@@ -154,6 +160,7 @@ unsigned short Logic::doDealerActions()
         dealerHand.push_back(deck.back());
         deck.pop_back();
         currentDealerValue = dealerHand.back() + currentDealerValue;
+        // if the dealer's hit results in a "bust" if ace = 11, remove offset
         if (currentDealerValue > 21 && dealerHasAce)
         {
             currentDealerValue -= 10;
@@ -164,6 +171,60 @@ unsigned short Logic::doDealerActions()
     return currentDealerValue;
 }
 
+void Logic::calculatePayout()
+{
+    /* NOTE: payouts are 3:2 */
+    const float PAYOUT_RATE = 1.5;
+
+    // if the dealer has blackjack, check if player has blackjack
+    if (hasBlackjack(dealerHand)) // this only matters if the dealer has blackjack initially (user only has 1 hand)
+    {
+        // if user has blackjack
+        if (hasBlackjack(userHands.front()))
+        {
+            payPlayer(currentBet); // this is a tie
+        }
+        // otherwise do nothing
+        return;
+    }
+
+    // if the dealer doesn't have blackjack, start checking user's hands
+    const unsigned short dealerHandValue = calculateHandValue(dealerHand);
+    for (unsigned int i = 0; i < userHands.size(); i++)
+    {
+        auto& hand = userHands.at(i);
+
+        if (hasBlackjack(hand))
+        {
+            // do payout immediately (no double down here)
+            payPlayer(currentBet * PAYOUT_RATE);
+        }
+        else
+        {
+            // factor to apply when paying player
+            int doubleDownFactor = (doubleDownTracker.at(i))?2:1;
+
+            // get the value for the current user's hand
+            unsigned short currentUserHandValue = calculateHandValue(hand);
+
+            // if bust, go to next hand
+            if (currentUserHandValue > 21) continue;
+
+            /// compare hand values here:
+            // on win
+            if (currentUserHandValue > dealerHandValue || dealerHandValue > 21)
+            {
+                payPlayer(currentBet * doubleDownFactor * PAYOUT_RATE);
+            }
+            // on tie
+            else if (currentUserHandValue == dealerHandValue)
+            {
+                payPlayer(currentBet * doubleDownFactor);
+            }
+            // on loss (do nothing)
+        }
+    }
+}
 
 /// Public Getter function definitions
 int Logic::getCurrentBet()
@@ -171,7 +232,6 @@ int Logic::getCurrentBet()
     return currentBet;
 }
 
-/// Public Getter function definitions
 int Logic::getInsuranceBet()
 {
     return currentInsuranceBet;
@@ -192,4 +252,26 @@ const std::vector<Card> Logic::getDealerHand()
 const std::vector<std::vector<Card>> Logic::getUserHand()
 {
     return userHands;
+}
+
+/// Public Helper function definitions
+unsigned short Logic::calculateHandValue(const std::vector<Card>& hand)
+{
+    // handValue (set to 10 if ace is there, otherwise set to 0)
+    bool handHasAce = hasAce(hand);
+    unsigned short handValue = (handHasAce)?10:0;
+
+    // loop to add all of the ranks
+    for (auto& card : hand)
+    {
+        handValue = card + handValue;
+    }
+
+    // if ace is in hand, then remove offset if value > 21
+    if (handHasAce && handValue > 21)
+    {
+        handValue -= 10;
+    }
+
+    return handValue;
 }

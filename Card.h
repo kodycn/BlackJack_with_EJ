@@ -24,8 +24,8 @@ public:
     QString getSuit() const;
 
     // operator overloading (to add card ranks together)
-    unsigned short operator+ (const Card&);
-    unsigned short operator+ (const unsigned short&);
+    unsigned short operator+ (const Card&) const;
+    unsigned short operator+ (const unsigned short&) const;
 };
 
 #endif // CARD_H
