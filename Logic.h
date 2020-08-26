@@ -46,6 +46,7 @@ public:
     static bool hasAce(const std::vector<Card>&);
     static bool hasBlackjack(const std::vector<Card>&);
 
+
     // Game funcs
     static void dealCards();
     static unsigned short doDealerActions();

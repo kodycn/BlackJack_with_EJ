@@ -35,5 +35,8 @@ private:
     void showCards();       // displays cards in Logic class
     void revealDealerHand();// reveals dealer hand
     void updateChoices();   // processes cards in Logic class and enables buttons
+    void disableButtons(); // during endphase, disable all the buttons. It's in the name >:(
+    // add function later to acknowledge how much they won
+    void endPhase();
 };
 #endif // MAINWINDOW_H

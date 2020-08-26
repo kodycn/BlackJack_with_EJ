@@ -3,6 +3,7 @@
 #include <iostream> // std::cerr
 #include <vector>
 
+#include <QDialog>
 
 /// Static Field Initialization
 int Logic::currentBet = 0;
@@ -17,6 +18,8 @@ std::vector<Card> Logic::dealerHand {};
 // random number generator fields
 std::random_device Logic::rd {};
 std::mt19937 Logic::rng ( rd() );
+
+
 
 /// Private Functions
 std::vector<Card> Logic::generateDeck()
@@ -33,7 +36,7 @@ std::vector<Card> Logic::generateDeck()
     {
         for (unsigned short rank = 1; rank <= 13; rank++)
         {
-            deck.emplace_back( rank, suits[suit] );
+            deck.emplace_back( (rank % 2 == 0)?1:10 , suits[suit] ); // rank
         }
     }
     return deck;
@@ -224,6 +227,7 @@ void Logic::calculatePayout()
             // on loss (do nothing)
         }
     }
+
 }
 
 /// Public Getter function definitions
@@ -275,3 +279,5 @@ unsigned short Logic::calculateHandValue(const std::vector<Card>& hand)
 
     return handValue;
 }
+
+

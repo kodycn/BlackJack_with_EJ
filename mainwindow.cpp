@@ -3,6 +3,8 @@
 #include "Logic.h"
 
 #include <QIntValidator>
+#include <QDialog>
+
 
 #include <iostream> // std::cerr
 #include <sstream>
@@ -49,6 +51,7 @@ void MainWindow::on_BetButton_clicked()
         ui->InsurancePaidLabel->setDisabled(true);
         /// start enabling the buttons that apply to the player
         updateChoices();
+
     }
 }
 
@@ -235,6 +238,16 @@ void MainWindow::updateChoices() // this should only be called at the start of t
     bool hasAceShown = (Logic::dealerHand.front().getRank() == 1);
     bool hasTenOrFaceShown = (Logic::dealerHand.front().getRank() >= 10);
 
+    // check for user BJ (blackjack)? don't enable anything: continue
+    if (Logic::hasBlackjack(Logic::userHands.at(0)))
+    {
+        // END GAME PHASE
+        // --> calculate payout
+        //Logic::calculatePayout();
+        endPhase();
+        return;
+    }
+
     // if ace is shown and user can afford insurance, then prompt user to choose insurance option
     if (hasAceShown && ui->InsuranceComboBox->currentIndex() == 0
             && (Logic::currentMoney - (Logic::currentBet / 2)) > 0
@@ -261,3 +274,34 @@ void MainWindow::updateChoices() // this should only be called at the start of t
         ui->SplitButton->setEnabled(true);
     }
 }
+void MainWindow::disableButtons()
+{
+    ui->BetButton->setDisabled(true);
+    ui->HitButton->setDisabled(true);
+    ui->StandButton->setDisabled(true);
+    ui->SurrenderButton->setDisabled(true);
+    ui->SplitButton->setDisabled(true);
+    ui->DoubleDownButton->setDisabled(true);
+    ui->InsuranceComboBox->setDisabled(true);
+}
+
+// after user has BJ or Dealer has BJ
+void MainWindow::endPhase()
+{
+    // maybe do showcards here?
+
+    // ORDER:
+    // disable all the buttons
+    // check who wins
+    // calc payouts
+    // open dialogue box to acknowledge win/loss (including amount won) "game over"
+
+    disableButtons();
+    Logic::calculatePayout(); // determines winner here too
+
+    // open dialogue
+    QDialog* popup = new QDialog(this);
+
+
+}
+
